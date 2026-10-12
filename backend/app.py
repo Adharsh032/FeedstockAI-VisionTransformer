@@ -83,6 +83,56 @@ async def get_sample_image(filename: str):
     return FileResponse(path, media_type="image/jpeg")
 
 
+@app.get("/api/test-images")
+async def list_test_images(page: int = 1, limit: int = 24, query: str = ""):
+    from backend.config import TEST_IMAGES_DIR
+    if not TEST_IMAGES_DIR.exists():
+        return {"images": [], "total": 0, "page": page, "total_pages": 0, "limit": limit}
+
+    all_names = [f.name for f in TEST_IMAGES_DIR.glob("*.jpg")]
+    if query and query.strip():
+        q = query.strip().lower()
+        filtered = [n for n in all_names if q in n.lower()]
+    else:
+        filtered = all_names
+
+    total = len(filtered)
+    total_pages = max(1, (total + limit - 1) // limit)
+    page = max(1, min(page, total_pages))
+    start = (page - 1) * limit
+    end = start + limit
+    page_items = filtered[start:end]
+
+    return {
+        "images": page_items,
+        "total": total,
+        "page": page,
+        "total_pages": total_pages,
+        "limit": limit
+    }
+
+
+@app.get("/api/test-images/image/{filename}")
+async def get_test_image_file(filename: str):
+    from backend.config import TEST_IMAGES_DIR
+    path = TEST_IMAGES_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Test image not found")
+    return FileResponse(path, media_type="image/jpeg")
+
+
+@app.post("/api/inspect/test-image/{filename}")
+async def inspect_test_image_endpoint(filename: str):
+    service = get_inference_service()
+    try:
+        result = service.inspect_test_image(filename)
+        return result
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Test image not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/inspect/sample/{filename}")
 async def inspect_sample_endpoint(filename: str):
     service = get_inference_service()

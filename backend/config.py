@@ -20,3 +20,5 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 APP_TITLE = "Industry 4.0 Feedstock Defect Detection & Quality AI"
 APP_VERSION = "2.0.0"
 APP_DESCRIPTION = "Vision Transformer (ViT) Surface Defect Detection & Quality Assessment System"
+
+TEST_IMAGES_DIR = DATASET_DIR / "test_images"

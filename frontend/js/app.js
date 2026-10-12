@@ -11,6 +11,11 @@ class FeedstockApp {
         this.currentInspection = null;
         this.soundEnabled = true;
 
+        // Test Images Modal state
+        this.testPage = 1;
+        this.testTotalPages = 1;
+        this.testQuery = "";
+
         this.init();
     }
 
@@ -21,6 +26,7 @@ class FeedstockApp {
 
         this.initNavTabs();
         this.initUploadEvents();
+        this.initTestImagesModal();
         this.initBatchEvents();
         this.initSound();
 
@@ -195,39 +201,19 @@ class FeedstockApp {
 
     initUploadEvents() {
         const globalInput = document.getElementById('globalFileInput');
-        const selectBtn = document.getElementById('selectFileBtn');
-        const fileInput = document.getElementById('fileInput');
-        const dropzone = document.getElementById('dropzonePlaceholder');
-        const headerBtn = document.getElementById('uploadImageHeaderBtn');
-        const viewerBtn = document.getElementById('uploadImageViewerBtn');
         const viewport = document.getElementById('viewportContainer');
 
-        const triggerFileDialog = (e) => {
-            if (e) e.stopPropagation();
-            if (globalInput) {
-                globalInput.value = '';
-                globalInput.click();
-            } else if (fileInput) {
-                fileInput.value = '';
-                fileInput.click();
-            }
-        };
-
-        if (headerBtn) headerBtn.addEventListener('click', triggerFileDialog);
-        if (viewerBtn) viewerBtn.addEventListener('click', triggerFileDialog);
-        if (selectBtn) selectBtn.addEventListener('click', triggerFileDialog);
-        if (dropzone) dropzone.addEventListener('click', triggerFileDialog);
-
-        const handleFileSelection = (e) => {
-            if (e.target.files && e.target.files.length > 0) {
-                const fd = new FormData();
-                fd.append('file', e.target.files[0]);
-                this.inspectUpload(fd);
-            }
-        };
-
-        if (globalInput) globalInput.addEventListener('change', handleFileSelection);
-        if (fileInput) fileInput.addEventListener('change', handleFileSelection);
+        if (globalInput) {
+            globalInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    this.inspectUpload(fd);
+                    globalInput.value = '';
+                }
+            });
+        }
 
         // Allow Drag and drop onto the entire viewport canvas at all times
         if (viewport) {
@@ -366,18 +352,14 @@ class FeedstockApp {
     }
 
     initBatchEvents() {
-        const batchSelectBtn = document.getElementById('batchSelectBtn');
         const batchFileInput = document.getElementById('batchFileInput');
-        const batchDropzone = document.getElementById('batchDropzone');
         const batchSampleBtn = document.getElementById('batchSampleRunBtn');
 
-        if (batchSelectBtn && batchFileInput) {
-            batchSelectBtn.addEventListener('click', () => batchFileInput.click());
-            batchDropzone.addEventListener('click', () => batchFileInput.click());
-
+        if (batchFileInput) {
             batchFileInput.addEventListener('change', async (e) => {
                 if (e.target.files.length > 0) {
                     await this.runBatchFiles(Array.from(e.target.files));
+                    batchFileInput.value = '';
                 }
             });
         }

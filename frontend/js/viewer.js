@@ -27,42 +27,48 @@ class DefectImageViewer {
 
     initEvents() {
         // Zoom controls
-        document.getElementById('zoomInBtn').addEventListener('click', () => this.setZoom(this.zoom + 0.25));
-        document.getElementById('zoomOutBtn').addEventListener('click', () => this.setZoom(this.zoom - 0.25));
-        document.getElementById('zoomResetBtn').addEventListener('click', () => this.resetTransform());
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const zoomResetBtn = document.getElementById('zoomResetBtn');
+
+        if (zoomInBtn) zoomInBtn.addEventListener('click', () => this.setZoom(this.zoom + 0.25));
+        if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => this.setZoom(this.zoom - 0.25));
+        if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => this.resetTransform());
 
         // Mouse Pan
-        this.wrapper.addEventListener('mousedown', (e) => {
-            if (this.img.style.display === 'none') return;
-            this.isDragging = true;
-            this.startX = e.clientX - this.panX;
-            this.startY = e.clientY - this.panY;
-            this.wrapper.style.cursor = 'grabbing';
-        });
+        if (this.wrapper) {
+            this.wrapper.addEventListener('mousedown', (e) => {
+                if (!this.img || this.img.style.display === 'none') return;
+                this.isDragging = true;
+                this.startX = e.clientX - this.panX;
+                this.startY = e.clientY - this.panY;
+                this.wrapper.style.cursor = 'grabbing';
+            });
 
-        window.addEventListener('mousemove', (e) => {
-            if (!this.isDragging) return;
-            this.panX = e.clientX - this.startX;
-            this.panY = e.clientY - this.startY;
-            this.updateTransform();
-        });
+            window.addEventListener('mousemove', (e) => {
+                if (!this.isDragging) return;
+                this.panX = e.clientX - this.startX;
+                this.panY = e.clientY - this.startY;
+                this.updateTransform();
+            });
 
-        window.addEventListener('mouseup', () => {
-            this.isDragging = false;
-            this.wrapper.style.cursor = 'grab';
-        });
+            window.addEventListener('mouseup', () => {
+                this.isDragging = false;
+                if (this.wrapper) this.wrapper.style.cursor = 'grab';
+            });
 
-        // Wheel Zoom
-        this.wrapper.addEventListener('wheel', (e) => {
-            if (this.img.style.display === 'none') return;
-            e.preventDefault();
-            const delta = e.deltaY < 0 ? 0.15 : -0.15;
-            this.setZoom(this.zoom + delta);
-        });
+            // Wheel Zoom
+            this.wrapper.addEventListener('wheel', (e) => {
+                if (!this.img || this.img.style.display === 'none') return;
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.15 : -0.15;
+                this.setZoom(this.zoom + delta);
+            });
+        }
 
         // Layer buttons
         document.querySelectorAll('.layer-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.currentLayer = btn.dataset.layer;
@@ -71,27 +77,32 @@ class DefectImageViewer {
         });
 
         // Opacity slider
-        this.opacityRange.addEventListener('input', (e) => {
-            const val = e.target.value;
-            this.opacityVal.textContent = ${val}%;
-            if (this.currentLayer !== 'raw') {
-                this.img.style.opacity = val / 100;
-            }
-        });
+        if (this.opacityRange) {
+            this.opacityRange.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (this.opacityVal) this.opacityVal.textContent = val + '%';
+                if (this.img && this.currentLayer !== 'raw') {
+                    this.img.style.opacity = val / 100;
+                }
+            });
+        }
 
         // Fullscreen
-        document.getElementById('fullscreenBtn').addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                this.container.requestFullscreen().catch(err => alert(err.message));
-            } else {
-                document.exitFullscreen();
-            }
-        });
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn && this.container) {
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    this.container.requestFullscreen().catch(err => alert(err.message));
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+        }
     }
 
     setZoom(val) {
         this.zoom = Math.max(0.5, Math.min(4.0, val));
-        this.zoomLabel.textContent = ${Math.round(this.zoom * 100)}%;
+        if (this.zoomLabel) this.zoomLabel.textContent = Math.round(this.zoom * 100) + '%';
         this.updateTransform();
     }
 
@@ -99,32 +110,34 @@ class DefectImageViewer {
         this.zoom = 1.0;
         this.panX = 0;
         this.panY = 0;
-        this.zoomLabel.textContent = '100%';
+        if (this.zoomLabel) this.zoomLabel.textContent = '100%';
         this.updateTransform();
     }
 
     updateTransform() {
-        this.img.style.transform = 	ranslate(px, px) scale();
+        if (this.img) {
+            this.img.style.transform = 'translate(' + this.panX + 'px, ' + this.panY + 'px) scale(' + this.zoom + ')';
+        }
     }
 
     startScanningAnimation() {
-        this.beam.style.display = 'block';
+        if (this.beam) this.beam.style.display = 'block';
     }
 
     stopScanningAnimation() {
-        this.beam.style.display = 'none';
+        if (this.beam) this.beam.style.display = 'none';
     }
 
     loadVisualizations(visMap) {
         this.visualizations = visMap;
-        this.dropzone.style.display = 'none';
-        this.img.style.display = 'block';
+        if (this.dropzone) this.dropzone.style.display = 'none';
+        if (this.img) this.img.style.display = 'block';
         this.resetTransform();
         this.renderCurrentLayer();
     }
 
     renderCurrentLayer() {
-        if (!this.visualizations) return;
+        if (!this.visualizations || !this.img) return;
 
         let src = '';
         if (this.currentLayer === 'bbox') {
@@ -138,7 +151,8 @@ class DefectImageViewer {
         }
 
         this.img.src = src;
-        this.img.style.opacity = (this.currentLayer === 'raw') ? '1.0' : (this.opacityRange.value / 100);
+        const opacityValue = this.opacityRange ? (this.opacityRange.value / 100) : 0.85;
+        this.img.style.opacity = (this.currentLayer === 'raw') ? '1.0' : opacityValue;
     }
 }
 

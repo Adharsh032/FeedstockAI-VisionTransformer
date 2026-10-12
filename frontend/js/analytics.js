@@ -20,6 +20,8 @@ class AnalyticsDashboard {
     }
 
     renderCharts(data) {
+        if (!window.Chart) return;
+
         const distData = data.dataset_metrics.class_distribution;
         const ctxDist = document.getElementById('distributionChart');
         if (ctxDist) {
@@ -52,7 +54,6 @@ class AnalyticsDashboard {
         if (ctxMatrix) {
             if (this.matrixChart) this.matrixChart.destroy();
             const matrixLabels = data.model_performance.confusion_matrix.labels;
-            // Sum per class
             const values = [5620, 815, 218, 4920, 735];
             this.matrixChart = new Chart(ctxMatrix, {
                 type: 'bar',
@@ -90,7 +91,7 @@ class AnalyticsDashboard {
 
             tbody.innerHTML = '';
             if (history.length === 0) {
-                tbody.innerHTML = <tr><td colspan="9" style="text-align:center; color:#64748b; padding:20px;">No inspections recorded in this session yet.</td></tr>;
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#64748b; padding:20px;">No inspections recorded in this session yet.</td></tr>';
                 return;
             }
 
@@ -98,20 +99,15 @@ class AnalyticsDashboard {
                 const tr = document.createElement('tr');
                 const badgeColor = item.verdict.includes('APPROVED') ? '#2ecc71' : (item.verdict.includes('CONDITIONAL') ? '#f59e0b' : '#ef4444');
                 tr.innerHTML = 
-                    <td style="font-family: 'JetBrains Mono'; font-weight:600;"></td>
-                    <td style="color:#94a3b8;"></td>
-                    <td></td>
-                    <td><span style="color:; font-weight:600;"></span></td>
-                    <td></td>
-                    <td style="font-family: 'JetBrains Mono';"></td>
-                    <td style="font-family: 'JetBrains Mono';">%</td>
-                    <td><span class="badge" style="background: rgba(255,255,255,0.08); color:;"></span></td>
-                    <td>
-                        <a href="/api/report/html/" target="_blank" class="btn btn-outline btn-sm" style="padding:2px 8px;">
-                            View Cert
-                        </a>
-                    </td>
-                ;
+                    '<td style="font-family: \'JetBrains Mono\'; font-weight:600;">' + item.inspection_id + '</td>' +
+                    '<td style="color:#94a3b8;">' + item.timestamp + '</td>' +
+                    '<td>' + item.source_filename + '</td>' +
+                    '<td><span style="color:' + badgeColor + '; font-weight:600;">' + item.class_name + '</span></td>' +
+                    '<td>' + item.quality_grade + '</td>' +
+                    '<td style="font-family: \'JetBrains Mono\';">' + item.quality_score + '</td>' +
+                    '<td style="font-family: \'JetBrains Mono\';">' + item.defect_area_pct + '%</td>' +
+                    '<td><span class="badge" style="background: rgba(255,255,255,0.08); color:' + badgeColor + ';">' + item.verdict + '</span></td>' +
+                    '<td><a href="/api/report/html/' + item.inspection_id + '" target="_blank" class="btn btn-outline btn-sm" style="padding:2px 8px;">View Cert</a></td>';
                 tbody.appendChild(tr);
             });
         } catch (e) {

@@ -33,8 +33,11 @@
             </div>
         </div>
         <div class="header-right">
-            <button id="uploadImageHeaderBtn" class="btn btn-primary btn-sm" title="Upload custom steel sheet image">
-                <i data-lucide="upload-cloud"></i> Upload Image
+            <label for="globalFileInput" class="btn btn-primary btn-sm" id="headerUploadLabel" title="Browse and upload local steel image" style="cursor: pointer;">
+                <i data-lucide="upload-cloud"></i> Browse Local Image
+            </label>
+            <button class="btn btn-secondary btn-sm" id="headerTestImagesBtn" type="button" title="Browse 5,506 Severstal test images">
+                <i data-lucide="images"></i> 5,506 Test Images
             </button>
             <button id="soundToggleBtn" class="icon-btn" title="Toggle Audio Alerts">
                 <i data-lucide="volume-2" id="soundIcon"></i>
@@ -119,8 +122,11 @@
                             </button>
                         </div>
                         <div class="viewer-controls">
-                            <button id="uploadImageViewerBtn" class="btn btn-secondary btn-sm" title="Upload new steel image for AI detection">
-                                <i data-lucide="upload"></i> Upload Sheet
+                            <label for="globalFileInput" class="btn btn-primary btn-sm" id="viewerUploadLabel" title="Browse local image from disk" style="cursor: pointer;">
+                                <i data-lucide="upload"></i> Browse Local Image
+                            </label>
+                            <button id="viewerTestImagesBtn" class="btn btn-secondary btn-sm" type="button" title="Browse and test 5,506 Severstal dataset images">
+                                <i data-lucide="images"></i> Test Images (5,506)
                             </button>
                             <div class="zoom-controls">
                                 <button id="zoomOutBtn" class="icon-btn-sm" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
@@ -139,9 +145,15 @@
                             <div id="dropzonePlaceholder" class="dropzone-box">
                                 <i data-lucide="upload-cloud" class="dropzone-icon"></i>
                                 <h4>Drop Feedstock Image Here</h4>
-                                <p>or click to browse from local computer (.jpg, .png)</p>
-                                <button class="btn btn-primary btn-sm" id="selectFileBtn">Browse Files</button>
-                                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                                <p>Select an image to detect defects, bounding boxes &amp; ViT attention heatmaps</p>
+                                <div class="dropzone-buttons-row">
+                                    <label for="globalFileInput" class="btn btn-primary btn-sm" id="selectFileLabel" style="cursor: pointer;">
+                                        <i data-lucide="folder-open"></i> Browse Local Files
+                                    </label>
+                                    <button class="btn btn-secondary btn-sm" id="openTestImagesModalBtn" type="button">
+                                        <i data-lucide="images"></i> Browse Dataset Test Images (5,506)
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="scanning-beam" id="scanningBeam" style="display: none;"></div>
@@ -325,8 +337,10 @@
                     <i data-lucide="folder-up" class="dropzone-icon"></i>
                     <h4>Select or Drop Multiple Feedstock Images</h4>
                     <p>Process 10 to 500 images simultaneously with automated aggregate reporting</p>
-                    <button class="btn btn-primary btn-sm" id="batchSelectBtn">Choose Files</button>
-                    <input type="file" id="batchFileInput" multiple accept="image/*" style="display: none;">
+                    <label for="batchFileInput" class="btn btn-primary btn-sm" id="batchSelectLabel" style="cursor: pointer;">
+                        <i data-lucide="folder-open"></i> Choose Multiple Files
+                    </label>
+                    <input type="file" id="batchFileInput" multiple accept="image/*" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
                 </div>
 
                 <!-- Batch Summary Stats Cards -->
@@ -563,8 +577,40 @@
         </section>
     </main>
 
-    <!-- Hidden Global File Input for 1-Click Upload -->
-    <input type="file" id="globalFileInput" accept="image/jpeg,image/png,image/bmp,image/webp" style="display: none;">
+    <!-- Global File Input for 1-Click Upload (Offscreen for 100% reliable browser triggering) -->
+    <input type="file" id="globalFileInput" accept="image/*" style="position: fixed; top: -9999px; left: -9999px; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
+
+    <!-- Modal for Browsing 5,506 Dataset Test Images -->
+    <div id="testImagesModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="panel-title-group">
+                    <i data-lucide="images" class="panel-icon text-cyan"></i>
+                    <h3 style="color:#fff; margin:0;">Severstal Dataset Test Images (5,506 Available)</h3>
+                </div>
+                <button class="icon-btn-sm" id="closeTestImagesModalBtn" type="button"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-toolbar">
+                <div class="search-input-wrap">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="testImageSearchInput" placeholder="Filter by image ID (e.g. 0000, 003c, 0042)..." class="search-box">
+                </div>
+                <button class="btn btn-secondary btn-sm" id="randomTestImageBtn" type="button">
+                    <i data-lucide="shuffle"></i> Pick Random Image
+                </button>
+            </div>
+            <div class="test-images-grid" id="testImagesGrid">
+                <!-- Dynamically loaded -->
+            </div>
+            <div class="modal-footer">
+                <div class="pagination-info" id="testPaginationInfo">Loading...</div>
+                <div class="pagination-buttons">
+                    <button class="btn btn-outline btn-sm" id="prevTestPageBtn" type="button">&larr; Previous</button>
+                    <button class="btn btn-outline btn-sm" id="nextTestPageBtn" type="button">Next &rarr;</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Floating Audio Element -->
     <audio id="passAudio" preload="auto" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>

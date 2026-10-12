@@ -52,6 +52,25 @@ class InferenceService:
         self._record_history(record)
         return record
 
+    def inspect_test_image(self, filename: str) -> Dict[str, Any]:
+        from backend.config import TEST_IMAGES_DIR
+        img_path = TEST_IMAGES_DIR / filename
+        if not img_path.exists():
+            raise FileNotFoundError(f"Test image not found: {filename}")
+
+        result = self.detector.analyze_image(str(img_path))
+        insp_id = f"INSP-TEST-{int(time.time())}-{uuid.uuid4().hex[:6].upper()}"
+        ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        record = {
+            "inspection_id": insp_id,
+            "timestamp": ts,
+            "source_filename": filename,
+            **result
+        }
+        self._record_history(record)
+        return record
+
     def inspect_image_bytes(self, file_bytes: bytes, filename: str) -> Dict[str, Any]:
         nparr = np.frombuffer(file_bytes, np.uint8)
         img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
