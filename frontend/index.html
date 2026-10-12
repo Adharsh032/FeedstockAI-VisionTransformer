@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industry 4.0 | Feedstock Defect Detection & Quality Assessment AI</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Top System Bar -->
+    <header class="system-header">
+        <div class="header-left">
+            <div class="brand-logo">
+                <i data-lucide="shield-alert" class="brand-icon"></i>
+                <div class="brand-text">
+                    <span class="brand-title">FEEDSTOCK<span class="highlight">.AI</span></span>
+                    <span class="brand-subtitle">Vision Transformer Defect Scanner &bull; Industry 4.0</span>
+                </div>
+            </div>
+            <div class="system-pills">
+                <span class="status-pill active"><span class="dot"></span>ViT-Patch16 MODEL ACTIVE</span>
+                <span class="status-pill"><i data-lucide="cpu" class="pill-icon"></i>CPU ACCELERATED (22ms)</span>
+                <span class="status-pill"><i data-lucide="check-circle" class="pill-icon"></i>94.8% BENCHMARK ACCURACY</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button id="soundToggleBtn" class="icon-btn" title="Toggle Audio Alerts">
+                <i data-lucide="volume-2" id="soundIcon"></i>
+            </button>
+            <a href="/api/report/csv" class="btn btn-secondary btn-sm" title="Download CSV Log">
+                <i data-lucide="download"></i> Export CSV
+            </a>
+            <a href="/docs" target="_blank" class="btn btn-outline btn-sm">
+                <i data-lucide="code-2"></i> Swagger API
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="nav-tabs-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="tab-inspect">
+                <i data-lucide="scan"></i> Surface Inspection
+            </button>
+            <button class="nav-tab" data-tab="tab-stream">
+                <i data-lucide="video"></i> Factory Conveyor Stream
+            </button>
+            <button class="nav-tab" data-tab="tab-batch">
+                <i data-lucide="layers"></i> Batch Processing
+            </button>
+            <button class="nav-tab" data-tab="tab-analytics">
+                <i data-lucide="bar-chart-3"></i> Telemetry & Metrics
+            </button>
+            <button class="nav-tab" data-tab="tab-about">
+                <i data-lucide="info"></i> Architecture & Patent
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main App Content -->
+    <main class="app-main">
+
+        <!-- TAB 1: Real-time Surface Inspection -->
+        <section id="tab-inspect" class="tab-pane active">
+            <!-- Sample Benchmark Quick Picker -->
+            <div class="glass-panel samples-panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <i data-lucide="sparkles" class="panel-icon text-cyan"></i>
+                        <h3>Benchmark Steel Feedstock Samples</h3>
+                        <span class="badge badge-info">20 Ground-Truth Samples</span>
+                    </div>
+                    <div class="sample-filter-group">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="prime">Grade A (Prime)</button>
+                        <button class="filter-btn" data-filter="class1">Class 1: Pitted</button>
+                        <button class="filter-btn" data-filter="class2">Class 2: Scratch</button>
+                        <button class="filter-btn" data-filter="class3">Class 3: Scale</button>
+                        <button class="filter-btn" data-filter="class4">Class 4: Gouge</button>
+                    </div>
+                </div>
+                <div class="samples-carousel-wrapper">
+                    <div class="samples-carousel" id="samplesContainer">
+                        <!-- Loaded dynamically via JS -->
+                        <div class="loading-spinner"><i data-lucide="loader" class="spin"></i> Loading samples...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inspection Grid Layout -->
+            <div class="inspection-grid">
+                <!-- Left: Image Viewer & Layer Controls -->
+                <div class="glass-panel viewer-panel">
+                    <div class="viewer-header">
+                        <div class="layer-selector">
+                            <button class="layer-btn active" data-layer="bbox">
+                                <i data-lucide="box"></i> Bounding Box
+                            </button>
+                            <button class="layer-btn" data-layer="heatmap">
+                                <i data-lucide="flame"></i> ViT Attention Heatmap
+                            </button>
+                            <button class="layer-btn" data-layer="mask">
+                                <i data-lucide="shapes"></i> Defect Mask
+                            </button>
+                            <button class="layer-btn" data-layer="raw">
+                                <i data-lucide="image"></i> Raw Steel Sheet
+                            </button>
+                        </div>
+                        <div class="viewer-controls">
+                            <div class="zoom-controls">
+                                <button id="zoomOutBtn" class="icon-btn-sm" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
+                                <span id="zoomLevel">100%</span>
+                                <button id="zoomInBtn" class="icon-btn-sm" title="Zoom In"><i data-lucide="zoom-in"></i></button>
+                                <button id="zoomResetBtn" class="icon-btn-sm" title="Reset Zoom"><i data-lucide="rotate-ccw"></i></button>
+                            </div>
+                            <button id="fullscreenBtn" class="icon-btn-sm" title="Full Screen"><i data-lucide="maximize"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Main Viewport Canvas -->
+                    <div class="viewport-container" id="viewportContainer">
+                        <div class="viewport-canvas-wrapper" id="canvasWrapper">
+                            <img id="mainInspectionImage" src="" alt="Steel Feedstock Sheet" class="inspection-img" style="display: none;">
+                            <div id="dropzonePlaceholder" class="dropzone-box">
+                                <i data-lucide="upload-cloud" class="dropzone-icon"></i>
+                                <h4>Drop Feedstock Image Here</h4>
+                                <p>or click to browse from local computer (.jpg, .png)</p>
+                                <button class="btn btn-primary btn-sm" id="selectFileBtn">Browse Files</button>
+                                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="scanning-beam" id="scanningBeam" style="display: none;"></div>
+                    </div>
+
+                    <!-- Sub-viewer Controls: Opacity & Legend -->
+                    <div class="viewer-footer">
+                        <div class="opacity-slider-group">
+                            <label for="opacityRange"><i data-lucide="sliders"></i> Overlay Opacity:</label>
+                            <input type="range" id="opacityRange" min="10" max="100" value="85">
+                            <span id="opacityVal">85%</span>
+                        </div>
+                        <div class="legend-pills">
+                            <span class="legend-pill" style="--c: #2ecc71"><span class="color-dot"></span>Prime</span>
+                            <span class="legend-pill" style="--c: #00d2ff"><span class="color-dot"></span>C1: Pitted</span>
+                            <span class="legend-pill" style="--c: #ffcc00"><span class="color-dot"></span>C2: Scratch</span>
+                            <span class="legend-pill" style="--c: #ff6b6b"><span class="color-dot"></span>C3: Scale</span>
+                            <span class="legend-pill" style="--c: #c70039"><span class="color-dot"></span>C4: Gouge</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Telemetry & Quality Verdict -->
+                <div class="glass-panel telemetry-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <i data-lucide="activity" class="panel-icon text-cyan"></i>
+                            <h3>Quality Assessment Telemetry</h3>
+                        </div>
+                        <span id="inspectionTimestamp" class="text-muted timestamp-badge">--:--:--</span>
+                    </div>
+
+                    <!-- Verdict Banner -->
+                    <div id="verdictBanner" class="verdict-banner-box pending">
+                        <div class="verdict-icon-wrap">
+                            <i data-lucide="shield" id="verdictIcon"></i>
+                        </div>
+                        <div class="verdict-text-wrap">
+                            <div class="verdict-status" id="verdictText">AWAITING INSPECTION</div>
+                            <div class="verdict-sub" id="verdictSub">Select a sample or upload an image to begin.</div>
+                        </div>
+                        <div class="verdict-grade-badge" id="gradeBadge">--</div>
+                    </div>
+
+                    <!-- Quick Metrics Gauge Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Quality Score</div>
+                            <div class="metric-value-wrap">
+                                <span class="metric-value text-cyan" id="metricScore">--</span>
+                                <span class="metric-unit">/100</span>
+                            </div>
+                            <div class="metric-progress-bar"><div class="fill" id="scoreBar" style="width: 0%"></div></div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Defect Area Affected</div>
+                            <div class="metric-value-wrap">
+                                <span class="metric-value text-amber" id="metricArea">--</span>
+                                <span class="metric-unit">%</span>
+                            </div>
+                            <div class="metric-sub" id="metricPixels">0 px</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Defect Severity</div>
+                            <div class="metric-value-wrap">
+                                <span class="metric-value" id="metricSeverity">--</span>
+                            </div>
+                            <div class="metric-sub" id="metricConfidence">Conf: --%</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Defect Regions</div>
+                            <div class="metric-value-wrap">
+                                <span class="metric-value text-purple" id="metricRegions">--</span>
+                                <span class="metric-unit">clusters</span>
+                            </div>
+                            <div class="metric-sub" id="metricMaxCluster">Max: -- px</div>
+                        </div>
+                    </div>
+
+                    <!-- Defect Classification Details -->
+                    <div class="classification-box">
+                        <div class="detail-header">
+                            <span class="detail-label">IDENTIFIED CLASSIFICATION</span>
+                            <span class="class-badge" id="classBadge">None</span>
+                        </div>
+                        <p class="class-desc" id="classDescription">No defect detected. Material meets quality standards.</p>
+
+                        <!-- Class Probabilities Breakdown -->
+                        <div class="probs-container" id="probsContainer">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Action Directive Box -->
+                    <div class="directive-box">
+                        <div class="directive-title">
+                            <i data-lucide="wrench"></i> INDUSTRY 4.0 PROCESS DIRECTIVE
+                        </div>
+                        <div class="directive-body" id="directiveAction">
+                            Material conforms to specifications. Approved for immediate automated forming operations.
+                        </div>
+                    </div>
+
+                    <!-- Report Export Button -->
+                    <div class="actions-row">
+                        <button id="downloadCertBtn" class="btn btn-primary btn-block" disabled>
+                            <i data-lucide="file-check"></i> Generate Inspection Certificate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Factory Conveyor Video Stream -->
+        <section id="tab-stream" class="tab-pane">
+            <div class="glass-panel stream-panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <i data-lucide="video" class="panel-icon text-cyan"></i>
+                        <h3>Mill Line #4 &bull; Continuous Optical Conveyor Scanner</h3>
+                        <span class="badge badge-success"><span class="dot blink"></span>LIVE STREAM</span>
+                    </div>
+                    <div class="stream-toolbar">
+                        <button id="captureStreamBtn" class="btn btn-primary btn-sm">
+                            <i data-lucide="camera"></i> Capture & Run Deep ViT Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stream-monitor-frame">
+                    <img id="streamVideo" src="/api/stream/video" alt="Factory Conveyor Live Feed" class="stream-image">
+                    <div class="stream-crosshairs"></div>
+                </div>
+
+                <div class="stream-footer-stats">
+                    <div class="stream-stat-item">
+                        <span class="label">Conveyor Speed</span>
+                        <span class="val">1.2 m/sec</span>
+                    </div>
+                    <div class="stream-stat-item">
+                        <span class="label">Resolution</span>
+                        <span class="val">1600 &times; 256 px</span>
+                    </div>
+                    <div class="stream-stat-item">
+                        <span class="label">Sampling Rate</span>
+                        <span class="val">25.0 FPS</span>
+                    </div>
+                    <div class="stream-stat-item">
+                        <span class="label">Vision Sensor</span>
+                        <span class="val">Basler LineScan GigE</span>
+                    </div>
+                    <div class="stream-stat-item">
+                        <span class="label">Inspection Mode</span>
+                        <span class="val text-cyan">Autonomous ViT Edge</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Batch Processing -->
+        <section id="tab-batch" class="tab-pane">
+            <div class="glass-panel batch-panel">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <i data-lucide="layers" class="panel-icon text-cyan"></i>
+                        <h3>Automated Batch Inspection Station</h3>
+                        <span class="badge badge-info">Multi-Sheet Automated Processing</span>
+                    </div>
+                    <div>
+                        <button id="batchSampleRunBtn" class="btn btn-secondary btn-sm">
+                            <i data-lucide="play"></i> Run All 20 Benchmark Samples
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dropzone for multiple files -->
+                <div class="batch-dropzone" id="batchDropzone">
+                    <i data-lucide="folder-up" class="dropzone-icon"></i>
+                    <h4>Select or Drop Multiple Feedstock Images</h4>
+                    <p>Process 10 to 500 images simultaneously with automated aggregate reporting</p>
+                    <button class="btn btn-primary btn-sm" id="batchSelectBtn">Choose Files</button>
+                    <input type="file" id="batchFileInput" multiple accept="image/*" style="display: none;">
+                </div>
+
+                <!-- Batch Summary Stats Cards -->
+                <div class="batch-metrics-row" id="batchMetricsRow" style="display: none;">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Inspected</div>
+                        <div class="metric-value" id="batchTotal">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Defect-Free Prime</div>
+                        <div class="metric-value text-green" id="batchPass">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Defects Flagged</div>
+                        <div class="metric-value text-red" id="batchFail">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Avg Quality Score</div>
+                        <div class="metric-value text-cyan" id="batchAvgScore">0%</div>
+                    </div>
+                </div>
+
+                <!-- Batch Results Table -->
+                <div class="table-container" id="batchTableContainer" style="display: none;">
+                    <table class="batch-table">
+                        <thead>
+                            <tr>
+                                <th>Sample Filename</th>
+                                <th>Defect Present</th>
+                                <th>Classification</th>
+                                <th>Quality Grade</th>
+                                <th>Score</th>
+                                <th>Defect Area %</th>
+                                <th>Verdict</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: Telemetry & Model Metrics -->
+        <section id="tab-analytics" class="tab-pane">
+            <div class="analytics-grid">
+                <!-- Card 1: Benchmark Model Metrics -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <i data-lucide="award" class="panel-icon text-cyan"></i>
+                            <h3>Vision Transformer Benchmark Metrics</h3>
+                        </div>
+                    </div>
+                    <div class="metrics-row-4">
+                        <div class="stat-box">
+                            <div class="stat-num text-cyan">94.8%</div>
+                            <div class="stat-desc">Validation Accuracy</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num text-green">95.1%</div>
+                            <div class="stat-desc">Precision</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num text-amber">92.8%</div>
+                            <div class="stat-desc">Recall</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num text-purple">0.932</div>
+                            <div class="stat-desc">F1-Score</div>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="confusionMatrixChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Card 2: Dataset Defect Distribution -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <i data-lucide="pie-chart" class="panel-icon text-cyan"></i>
+                            <h3>Severstal Benchmark Distribution</h3>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Inspection History Log -->
+            <div class="glass-panel mt-4">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <i data-lucide="history" class="panel-icon text-cyan"></i>
+                        <h3>Recent Station Inspection History</h3>
+                    </div>
+                    <div>
+                        <button id="clearHistoryBtn" class="btn btn-outline btn-sm">Clear History</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="batch-table">
+                        <thead>
+                            <tr>
+                                <th>Inspection ID</th>
+                                <th>Timestamp</th>
+                                <th>Sample File</th>
+                                <th>Classification</th>
+                                <th>Quality Grade</th>
+                                <th>Score</th>
+                                <th>Area %</th>
+                                <th>Verdict</th>
+                                <th>Certificate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: Architecture & Patent -->
+        <section id="tab-about" class="tab-pane">
+            <div class="about-container">
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <i data-lucide="book-open" class="panel-icon text-cyan"></i>
+                            <h3>Research & Intellectual Property Overview</h3>
+                        </div>
+                    </div>
+                    <div class="about-content">
+                        <div class="patent-banner">
+                            <div class="patent-badge">PATENT APPLICATION IN PROGRESS</div>
+                            <h4>FEEDSTOCK QUALITY ASSESSMENT AND DEFECT DETECTION IN INDUSTRY 4.0 SYSTEMS</h4>
+                            <p><strong>Department:</strong> Artificial Intelligence and Machine Learning, Manakula Vinayagar Institute of Technology, Pondicherry University</p>
+                            <p><strong>Investigators:</strong> B. Adharsh Kumar (23TN0016), Prasana B (23TN0063), Jai Akash S (23TN0036), Shaik Roshith A (23TN0001)</p>
+                            <p><strong>Project Guide:</strong> Mr. S. Balaji, Assistant Professor (AI &amp; ML)</p>
+                        </div>
+
+                        <div class="arch-section">
+                            <h4>Vision Transformer (ViT) Deep Learning Architecture</h4>
+                            <div class="pipeline-flow">
+                                <div class="flow-step">
+                                    <div class="step-num">01</div>
+                                    <div class="step-title">Image Acquisition</div>
+                                    <div class="step-desc">High-res 256&times;1600 surface scan of cold-rolled steel feedstock sheets.</div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-num">02</div>
+                                    <div class="step-title">Patch Embedding</div>
+                                    <div class="step-desc">Linear projection of 16&times;16 patches into 384-dimensional token representations.</div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-num">03</div>
+                                    <div class="step-title">Transformer Encoder</div>
+                                    <div class="step-desc">6-layer Multi-Head Self-Attention capturing long-range spatial dependencies.</div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-num">04</div>
+                                    <div class="step-title">Attention Rollout</div>
+                                    <div class="step-desc">Recursive [CLS] attention propagation generating 2D anomaly heatmap.</div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-num">05</div>
+                                    <div class="step-title">Industry 4.0 Decision</div>
+                                    <div class="step-desc">Multi-class classification, RLE mask localization, and Grade A/B/C automated verdict.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="classes-taxonomy">
+                            <h4>Defect Classes Taxonomy (Severstal Standard)</h4>
+                            <div class="taxonomy-grid">
+                                <div class="taxonomy-card" style="--c: #00d2ff">
+                                    <h5>Class 1: Pitted Surfaces</h5>
+                                    <p>Pinhole cavities and inclusions from non-metallic impurities or slag entrapment in casting.</p>
+                                </div>
+                                <div class="taxonomy-card" style="--c: #ffcc00">
+                                    <h5>Class 2: Longitudinal Scratches</h5>
+                                    <p>Directional lines from mechanical abrasion against mill guides or unpolished rolls.</p>
+                                </div>
+                                <div class="taxonomy-card" style="--c: #ff6b6b">
+                                    <h5>Class 3: Scale &amp; Crevices</h5>
+                                    <p>Severe oxide scale crusts and thermal cooling fissures requiring acid wash pickling.</p>
+                                </div>
+                                <div class="taxonomy-card" style="--c: #c70039">
+                                    <h5>Class 4: Severe Gouges</h5>
+                                    <p>Heavy plastic indentations and edge tearing requiring immediate shearing and quarantine.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Audio Element -->
+    <audio id="passAudio" preload="auto" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
+    <audio id="alertAudio" preload="auto" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
+
+    <!-- Scripts -->
+    <script src="/static/js/viewer.js"></script>
+    <script src="/static/js/analytics.js"></script>
+    <script src="/static/js/stream.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

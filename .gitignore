@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Caches and environments
+.env
+.venv
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Heavy archives and installers (> 100MB)
+Reference/*.zip
+Reference/*.exe
+*.zip
+*.exe
+
+# Heavy raw test images dataset directory (5500+ images)
+data/severstal-steel-defect-detection/test_images/
+severstal-steel-defect-detection/test_images/
+
+# System / IDE files
+.vscode/
+.idea/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Temporary outputs & logs
+*.log
+scratch/
+temp/
+tmp/
