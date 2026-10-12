@@ -149,7 +149,21 @@ AI - Error detect/
 
 ## ?? Quick Start Guide
 
-### Option 1: One-Click Launcher (Windows)
+### Option 1: Visual Studio Code (Recommended)
+1. Open this project folder in **VS Code**:
+   ```bash
+   code .
+   ```
+2. **Press `F5`** or open [`main.py`](file:///main.py) and click the **Run Python File (?)** button in the top right corner.
+3. The server starts and automatically opens your web browser to **http://localhost:8000**!
+
+> **VS Code Features Included:**
+> - **Pre-configured Debugger (`.vscode/launch.json`)**: Press `F5` to debug with breakpoints or hot-reload.
+> - **Build Task (`Ctrl+Shift+B`)**: Immediately starts the application via `.vscode/tasks.json`.
+> - **Test Explorer**: Built-in test discovery for unit & integration tests.
+> - **Jupyter Notebooks**: Open [`notebooks/Feedstock_ViT_Local_Pipeline.ipynb`](file:///notebooks/Feedstock_ViT_Local_Pipeline.ipynb) to step through model inference cell-by-cell.
+
+### Option 2: One-Click Launcher (Windows)
 Double-click `run_app.bat` (or execute `run_app.ps1` in PowerShell).  
 The server will start at `http://localhost:8000/` and automatically launch your default browser!
 

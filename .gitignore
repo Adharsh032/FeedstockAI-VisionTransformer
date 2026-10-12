@@ -28,7 +28,6 @@ data/severstal-steel-defect-detection/test_images/
 severstal-steel-defect-detection/test_images/
 
 # System / IDE files
-.vscode/
 .idea/
 Thumbs.db
 ehthumbs.db

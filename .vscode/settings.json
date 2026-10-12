@@ -1,0 +1,24 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "backend/tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/__pycache__": true
+    },
+    "editor.formatOnSave": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell"
+}
