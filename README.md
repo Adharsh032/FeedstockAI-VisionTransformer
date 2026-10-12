@@ -1,238 +1,318 @@
-# FEEDSTOCK.AI - Industry 4.0 Vision Transformer Defect Detection System
+# FEEDSTOCK.AI --- Steel Surface Defect Detection
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Validation Accuracy](https://img.shields.io/badge/Validation%20Accuracy-94.8%25-brightgreen)](https://github.com/)
-[![Status](https://img.shields.io/badge/Status-Patent%20Pending-blue)](https://github.com/)
 
-> An Intelligent Vision Transformer (ViT)-based deep learning solution for automated feedstock visual quality inspection, multi-class surface defect segmentation, and Industry 4.0 real-time manufacturing decisions.
+FEEDSTOCK.AI is a research project exploring Vision Transformer
+(ViT)-based inspection of steel surfaces. It is designed to classify
+surface defects, visualize potential defect regions, and present
+inspection results through a web dashboard for manufacturing
+quality-control workflows.
 
----
+> **Project note:** Performance figures and patent status should be
+> published only when they have been verified and can be supported by
+> project records.
 
-## Executive Summary and Academic Credits
+## Contents
 
-- **Project Title:** Implementation of an Intelligent Vision Transformer-Based Deep Learning Model for Feedstock Quality Assessment and Defect Detection in Industry 4.0 Production Systems
-- **Institution:** Department of Artificial Intelligence and Machine Learning, Manakula Vinayagar Institute of Technology, Pondicherry University, India
-- **Investigators:**
-  - **B. Adharsh Kumar** (Reg No: 23TN0016)
-  - **Prasana B** (Reg No: 23TN0063)
-  - **Jai Akash S** (Reg No: 23TN0036)
-  - **Shaik Roshith A** (Reg No: 23TN0001)
-- **Project Guide:** **Mr. S. Balaji**, Assistant Professor (AI & ML)
-- **Patent Status:** Application in Progress (*Ref: FeedStock-ViT-2026*)
+-   [Overview](#overview)
+-   [Features](#features)
+-   [System Pipeline](#system-pipeline)
+-   [Technology Stack](#technology-stack)
+-   [Dataset](#dataset)
+-   [Project Structure](#project-structure)
+-   [Getting Started](#getting-started)
+-   [Running Tests](#running-tests)
+-   [API Reference](#api-reference)
+-   [Project Team](#project-team)
+-   [References](#references)
 
----
+## Overview
 
-## System Architecture and Pipeline
+The project combines a Vision Transformer model with image-processing
+and backend services to support steel-sheet inspection. The intended
+workflow is to submit or select a steel-surface image, run model
+inference, view predicted defects and visual explanations, and review or
+export inspection records.
 
-`
-+-----------------------------------------------------------------------------+
-|                     FEEDSTOCK.AI PIPELINE ARCHITECTURE                      |
-+-----------------------------------------------------------------------------+
-  [Raw Feedstock Sheet]  (256 x 1600 px high-res industrial camera capture)
-           |
-           v
-  [Patch Embedding]      (16 x 16 patches projected to 384-dimensional tokens)
-           |
-           v
-  [Transformer Encoder]  (6-layer Multi-Head Self-Attention capturing long-range
-           |              spatial dependencies across steel sheet surface)
-           +-------------------------------+
-           |                               |
-           v                               v
-  [Attention Rollout Engine]     [Multi-Task Classification Heads]
-  (Recursive attention from        - Binary Defect Presence: P(Defect)
-   [CLS] token to 2D heatmap)      - 4-Class Defect Categorization
-           |                       - Automated Quality Grade: A / B / C
-           v                               |
-  [Defect Localization & Mask]             |
-  (Fused ViT attention + surface           |
-   texture gradient contours)              |
-           |                               |
-           +---------------+---------------+
-                           |
-                           v
-  [Industry 4.0 Telemetry & Action Directive]
-  - Bounding Boxes & Area % metrics
-  - Quality Verdict (APPROVED / CONDITIONAL REWORK / QUARANTINE REJECT)
-  - Printable Inspection Certificate & Real-Time Conveyor Stream
-`
+The implementation described in this repository includes a FastAPI
+backend, a browser-based dashboard, model inference utilities, benchmark
+samples, analytics, and report-generation services.
 
----
+## Features
 
-## Severstal Benchmark Defect Taxonomy
+-   **Image inspection:** Submit a steel-surface image for model
+    inference.
+-   **Defect visualization:** View available heatmaps, masks, contours,
+    and bounding-box overlays.
+-   **Benchmark samples:** Run inspections on curated sample images.
+-   **Test-image browser:** Search and inspect images from the Severstal
+    test set when the dataset files are available locally.
+-   **Batch inspection:** Process multiple images and review aggregate
+    results.
+-   **Conveyor simulation:** View a simulated industrial camera stream.
+-   **Analytics and history:** Review session inspection records and
+    model statistics.
+-   **Report export:** Generate printable inspection reports and export
+    session records as CSV.
+-   **API documentation:** Explore available endpoints through FastAPI's
+    Swagger UI.
 
-| Defect Class | Classification Name | Root Cause in Manufacturing | Recommended Industrial Action |
-| :--- | :--- | :--- | :--- |
-| **Grade A** | **Prime Defect-Free Material** | Optimal continuous casting and rolling | Approved for immediate forming and stamping |
-| **Class 1** | **Pitted Surface / Inclusion** | Non-metallic slag entrapment or pinholes | Secondary structural forming; inspect casting nozzle |
-| **Class 2** | **Surface Scratch / Crack** | Roll guide friction / mechanical abrasion | Polish guide stand #2; verify alignment |
-| **Class 3** | **Scale / Crevice / Flaking** | Thermal cooling discrepancies and oxidation | Acid wash pickling line; boost descaling water jets |
-| **Class 4** | **Severe Gouge / Deformation** | Heavy plastic indentation or tearing | Immediate shear quarantine to protect blanking dies |
+Feature availability depends on the code, model weights, and dataset
+files included in the local checkout.
 
----
+## System Pipeline
 
-## Key Features and Capabilities
+``` text
+Steel-surface image
+        |
+        v
+Image preprocessing
+        |
+        v
+Vision Transformer inference
+        |
+        +----------------------+
+        |                      |
+        v                      v
+Defect classification     Attention / localization
+        |                      |
+        +-----------+----------+
+                    |
+                    v
+        Inspection result and visualizations
+                    |
+                    v
+       Dashboard, history, and report export
+```
 
-1. **Real-Time Surface Inspection:**
-   - Interactive zoom (50% to 400%) and smooth panning across high-resolution 256 x 1600 steel sheets.
-   - 4-layer switchable overlay: **Bounding Boxes**, **ViT Attention Heatmap**, **Segmentation Mask**, and **Raw Image**.
-   - Adjustable overlay opacity slider.
-   - Dynamic scanning laser beam animation during inspection.
-2. **20 Pre-Loaded Benchmark Samples:**
-   - 1-click testing of ground-truth steel sheets (Prime material and Classes 1 through 4) with pre-verified RLE masks.
-3. **Built-in 5,506 Dataset Test Images Browser:**
-   - Integrated modal to search, browse, paginate, or randomly select from all 5,506 Severstal test images with 1-click instant AI diagnosis.
-4. **Live Factory Conveyor Simulation:**
-   - Real-time simulated industrial line scan camera streaming at 25 FPS with scanning HUD.
-   - 1-click **Capture and Run Deep ViT Analysis** to freeze any live frame for diagnosis.
-5. **Automated Batch Processing:**
-   - Drag-and-drop multiple images simultaneously.
-   - Aggregate statistics: pass rate, defect count, average quality score, and searchable per-sheet inspection table.
-6. **Telemetry and Analytics Dashboard:**
-   - Live Chart.js visualizations for Severstal benchmark class distribution and validation detections (94.8% accuracy, 0.932 F1-score).
-   - Session history log with instant access to generated certificates.
-7. **Official Industry 4.0 Inspection Certificates:**
-   - 1-click generation of printable, professional Quality Inspection Certificates (HTML/PDF-ready).
-   - Instant CSV log export for enterprise MES (Manufacturing Execution Systems).
+## Technology Stack
 
----
+  Component                     Technology
+  ----------------------------- --------------------------------------
+  Language                      Python 3.11+
+  Deep learning                 PyTorch
+  Vision model                  Vision Transformer (ViT)
+  API backend                   FastAPI
+  Request/response validation   Pydantic
+  Dashboard                     HTML, CSS, JavaScript
+  Charts                        Chart.js
+  Dataset benchmark             Severstal Steel Defect Detection
+  Development tools             Visual Studio Code, Jupyter Notebook
 
-## Project Organization
+## Dataset
 
-`
-AI - Error detect/
-|-- backend/                             # High-performance FastAPI Backend Service
-|   |-- app.py                           # API routes, middleware, and static mounting
-|   |-- config.py                        # Paths and server configuration
-|   |-- schemas.py                       # Pydantic request and response models
-|   |-- services/                        # Business and AI inference services
-|   |   |-- inference_service.py         # End-to-end detector & history tracking
-|   |   |-- camera_stream.py             # Factory conveyor camera simulator
-|   |   |-- analytics_service.py         # Aggregated dataset and model statistics
-|   |   -- report_service.py            # Certificate and CSV export generator
-|   -- tests/
-|       -- test_api.py                  # Automated test suite (7/7 passing)
-|-- models/                              # Core AI and Vision Transformer Models
-|   |-- vit_model.py                     # Multi-Head Attention ViT & Attention Rollout
-|   |-- vit_feedstock_defect_model.pth   # 42.5 MB Trained PyTorch Model Weights
-|   |-- model_metadata.json              # Architecture parameters & layer definitions
-|   |-- defect_classifier.py             # End-to-end defect detection & quality grading
-|   |-- defect_localizer.py              # Heatmaps, contours, masks, and bounding boxes
-|   -- rle_codec.py                     # Run-Length Encoding (RLE) encoder/decoder
-|-- frontend/                            # Modern Industry 4.0 Dark Glassmorphism UI
-|   |-- index.html                       # Polished single-page web dashboard
-|   |-- assets/                          # Favicon and icons
-|   |-- css/
-|   |   -- styles.css                   # Futuristic industrial styling & themes
-|   -- js/
-|       |-- app.js                       # Master application orchestrator
-|       |-- viewer.js                    # Zoom/Pan interactive viewport engine
-|       |-- analytics.js                 # Telemetry & Chart.js graph renderers
-|       -- stream.js                    # Live conveyor camera stream controller
-|-- data/                                # Dataset and Curated Benchmark Data
-|   |-- samples/                         # 20 curated benchmark steel sheet images
-|   |-- samples_metadata.json            # Ground-truth labels, classes, and RLE masks
-|   -- severstal-steel-defect-detection/ # Severstal benchmark CSVs and test images
-|-- docs/                                # Academic & Research Documentation
-|   |-- patent/                          # Feed Stock Patent documentation (DOCX & PDF)
-|   |-- reports/                         # Project evaluation reports and bonafide certs
-|   |-- posters_and_presentations/       # Presentation slides and project posters
-|   |-- journal/                         # Academic publication drafts
-|   |-- research_papers/                 # 10 reference peer-reviewed literature papers
-|   -- media/                           # Video demonstration and reference images
-|-- notebooks/                           # Research & Prototyping Notebooks
-|   |-- Feedstock_ViT_Local_Pipeline.ipynb # Local self-contained executable notebook
-|   -- Feedstock_ViT_Project.ipynb      # Original Google Colab training notebook
-|-- .vscode/                             # Visual Studio Code Run & Debug Configs
-|   |-- launch.json                      # F5 debugging configurations
-|   |-- tasks.json                       # Default build tasks (Ctrl+Shift+B)
-|   |-- settings.json                    # Workspace settings & test discovery
-|   -- extensions.json                  # Recommended VS Code extensions
-|-- main.py                              # Root Python entrypoint for VS Code
-|-- run_app.bat                          # Windows 1-click batch launcher
-|-- run_app.ps1                          # Windows PowerShell launcher
-|-- requirements.txt                     # Python dependencies
-|-- .gitignore                           # Clean Git tracking configuration
--- README.md                            # Complete Project Documentation
-`
+The project references the **Severstal: Steel Defect Detection** dataset
+hosted on Kaggle.
 
----
+Dataset access and local file placement may be required for browsing the
+full test set or running dataset-based evaluations. Review the dataset's
+license and terms before redistribution. Do not commit large dataset
+archives or private data to the repository.
 
-## Quick Start Guide
+## Project Structure
 
-### Option 1: Visual Studio Code (Recommended)
-1. Open this project folder in **VS Code**:
-   `ash
-   code .
-   `
-2. **Press F5** or open main.py and click the **Run Python File** button in the top right corner.
-3. The server starts and automatically opens your web browser to **http://localhost:8000**!
+``` text
+AI-Error-detect/
+├── backend/
+│   ├── app.py
+│   ├── config.py
+│   ├── schemas.py
+│   ├── services/
+│   │   ├── inference_service.py
+│   │   ├── camera_stream.py
+│   │   ├── analytics_service.py
+│   │   └── report_service.py
+│   └── tests/
+│       └── test_api.py
+├── models/
+│   ├── vit_model.py
+│   ├── defect_classifier.py
+│   ├── defect_localizer.py
+│   ├── rle_codec.py
+│   └── model_metadata.json
+├── frontend/
+│   ├── index.html
+│   ├── assets/
+│   ├── css/
+│   │   └── styles.css
+│   └── js/
+│       ├── app.js
+│       ├── viewer.js
+│       ├── analytics.js
+│       └── stream.js
+├── data/
+│   ├── samples/
+│   └── samples_metadata.json
+├── docs/
+├── notebooks/
+├── .vscode/
+├── main.py
+├── run_app.bat
+├── run_app.ps1
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
 
-> **VS Code Features Included:**
-> - **Pre-configured Debugger (.vscode/launch.json):** Press F5 to debug with breakpoints or hot-reload.
-> - **Build Task (Ctrl+Shift+B):** Immediately starts the application via .vscode/tasks.json.
-> - **Test Explorer:** Built-in test discovery for unit & integration tests.
-> - **Jupyter Notebooks:** Open 
-otebooks/Feedstock_ViT_Local_Pipeline.ipynb to step through model inference cell-by-cell.
+The tree is a guide to the intended layout. Some folders and files,
+including trained model weights and dataset assets, may be omitted from
+a Git checkout because of their size or licensing.
 
-### Option 2: One-Click Launcher (Windows)
-Double-click 
-un_app.bat (or execute 
-un_app.ps1 in PowerShell).  
-The server will start at http://localhost:8000/ and automatically launch your default browser!
+## Getting Started
 
-### Option 3: Terminal Command Line
-1. **Install Dependencies:**
-   `ash
-   pip install -r requirements.txt
-   `
-2. **Launch the Application:**
-   `ash
-   python main.py
-   `
-3. **Open the Web Dashboard:**
-   - Dashboard: **http://localhost:8000**
-   - Interactive API Docs (Swagger): **http://localhost:8000/docs**
+### Prerequisites
 
----
+-   Python 3.11 or a compatible version supported by the dependencies
+-   Git
+-   The project source code
+-   Model weights and dataset assets, if required by the selected
+    feature
 
-## Running Automated Tests
+### 1. Clone the repository
 
-Run the built-in unit and integration test suite:
-`ash
+Replace the placeholder URL with the URL of your GitHub repository.
+
+``` bash
+git clone <YOUR_REPOSITORY_URL>
+cd AI-Error-detect
+```
+
+### 2. Create and activate a virtual environment
+
+**Windows PowerShell**
+
+``` powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+**Windows Command Prompt**
+
+``` bat
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+**macOS / Linux**
+
+``` bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+``` bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 4. Start the application
+
+From the project root, run:
+
+``` bash
+python main.py
+```
+
+If the repository's Windows launcher scripts are present, you can also
+use `run_app.bat` or `run_app.ps1`.
+
+Open the dashboard at:
+
+-   **Dashboard:** http://localhost:8000
+-   **Interactive API documentation:** http://localhost:8000/docs
+-   **Alternative API documentation:** http://localhost:8000/redoc
+
+If the application uses a different port in your local configuration,
+use the URL printed in the terminal.
+
+## Running Tests
+
+Run the API test suite from the project root:
+
+``` bash
 python -m unittest backend/tests/test_api.py
-`
-*All 7 tests pass with sub-second execution.*
+```
 
----
+The test result depends on the installed dependencies, configuration,
+model files, and dataset assets available in your environment.
 
-## REST API Reference
+## API Reference
 
-| Endpoint | Method | Description |
-| :--- | :---: | :--- |
-| /api/health | GET | Health check and active AI engine status |
-| /api/model/info | GET | Retrieve ViT architecture, parameter count, and weights status |
-| /api/samples | GET | Retrieve 20 pre-loaded benchmark samples metadata |
-| /api/samples/image/{filename} | GET | Serve raw benchmark feedstock image |
-| /api/test-images | GET | List, search, and paginate 5,506 Severstal test images |
-| /api/test-images/image/{filename} | GET | Serve raw test image file |
-| /api/inspect/sample/{filename} | POST | Execute AI inspection on a benchmark sample |
-| /api/inspect/test-image/{filename} | POST | Execute AI inspection on any of the 5,506 test images |
-| /api/inspect/upload | POST | Upload custom steel sheet image for deep ViT inspection |
-| /api/inspect/batch | POST | Inspect multiple images concurrently |
-| /api/stream/video | GET | Live MJPEG industrial conveyor camera video feed |
-| /api/analytics | GET | Retrieve model performance metrics & class distribution |
-| /api/history | GET | Retrieve session inspection logs |
-| /api/report/html/{id} | GET | Generate printable Industry 4.0 Inspection Certificate |
-| /api/report/csv | GET | Download complete session inspection CSV audit log |
+The following endpoints are described by the project implementation.
+Confirm the current route definitions in `backend/app.py` before relying
+on them.
 
----
+  --------------------------------------------------------------------------------------
+  Method                  Endpoint                               Purpose
+  ----------------------- -------------------------------------- -----------------------
+  `GET`                   `/api/health`                          Check service health
 
-## References and Literature Citations
+  `GET`                   `/api/model/info`                      Retrieve model
+                                                                 information
 
-1. Dosovitskiy, A., et al. *An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.* ICLR, 2021.
-2. Severstal: *Steel Defect Detection - High-frequency surface inspection benchmark.* Kaggle Competition Dataset.
-3. Singh, P. & Patel, A. *AI-Powered Feedstock Image Analysis for Manufacturing Quality Control.* IJAMT, 2023.
-4. Wang, R., Jiang, T., & Li, S. *A Hybrid CNN-ViT Architecture for Metal Surface Defect Detection.* IEEE Access, 2023.
+  `GET`                   `/api/samples`                         List curated benchmark
+                                                                 samples
+
+  `GET`                   `/api/samples/image/{filename}`        Retrieve a sample image
+
+  `GET`                   `/api/test-images`                     Search or paginate test
+                                                                 images
+
+  `GET`                   `/api/test-images/image/{filename}`    Retrieve a test image
+
+  `POST`                  `/api/inspect/sample/{filename}`       Inspect a benchmark
+                                                                 sample
+
+  `POST`                  `/api/inspect/test-image/{filename}`   Inspect a test-set
+                                                                 image
+
+  `POST`                  `/api/inspect/upload`                  Inspect an uploaded
+                                                                 image
+
+  `POST`                  `/api/inspect/batch`                   Inspect multiple images
+
+  `GET`                   `/api/stream/video`                    Access the simulated
+                                                                 camera stream
+
+  `GET`                   `/api/analytics`                       Retrieve analytics
+
+  `GET`                   `/api/history`                         Retrieve session
+                                                                 history
+
+  `GET`                   `/api/report/html/{id}`                Generate an inspection
+                                                                 report
+
+  `GET`                   `/api/report/csv`                      Export inspection
+                                                                 records
+  --------------------------------------------------------------------------------------
+
+## Project Team
+
+**Institution:** Department of Artificial Intelligence and Machine
+Learning, Manakula Vinayagar Institute of Technology, affiliated with
+Pondicherry University, India.
+
+**Project contributors** - B. Adharsh Kumar - Prasana B. - Jai Akash
+S. - Shaik Roshith A.
+
+**Project guide:** Mr. S. Balaji, Assistant Professor, AI & ML.
+
+## References
+
+1.  Dosovitskiy, A., et al. "An Image is Worth 16x16 Words: Transformers
+    for Image Recognition at Scale." *International Conference on
+    Learning Representations (ICLR)*, 2021.
+2.  Kaggle. "Severstal: Steel Defect Detection."
+    https://www.kaggle.com/c/severstal-steel-defect-detection
+3.  Vaswani, A., et al. "Attention Is All You Need." *Advances in Neural
+    Information Processing Systems*, 2017.
+
+## License
+
+No license has been specified in this README. Add a `LICENSE` file
+before presenting the repository as open source, and ensure that dataset
+and model assets can legally be redistributed.
