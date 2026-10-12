@@ -77,6 +77,14 @@ class FeedstockDefectDetector:
             num_heads=6,
             num_classes=4
         ).to(self.device)
+
+        # Load trained ViT neural weights if present
+        from pathlib import Path
+        weights_path = Path(__file__).parent / "vit_feedstock_defect_model.pth"
+        if weights_path.exists():
+            state = torch.load(weights_path, map_location=self.device)
+            self.vit.load_state_dict(state)
+            print(f"[+] Loaded trained Vision Transformer weights from: {weights_path.name}")
         self.vit.eval()
 
     def preprocess_image(self, img_bgr: np.ndarray) -> torch.Tensor:

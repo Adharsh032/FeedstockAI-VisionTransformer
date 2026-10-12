@@ -1,0 +1,21 @@
+{
+  "model_name": "Feedstock Vision Transformer (ViT-Patch16-224)",
+  "architecture": "PatchEmbedding + 6-Layer Multi-Head Self-Attention Transformer Encoder",
+  "weights_file": "models/vit_feedstock_defect_model.pth",
+  "weights_size_mb": 42.54,
+  "total_parameters": 11142920,
+  "patch_size": "16x16 pixels",
+  "num_patches": 196,
+  "embedding_dim": 384,
+  "attention_heads": 6,
+  "encoder_layers": 6,
+  "input_resolution": "224x224x3",
+  "target_dataset": "Severstal Steel Defect Detection (Cold/Hot-Rolled Feedstock)",
+  "num_defect_classes": 4,
+  "quality_grades": [
+    "Grade A (Prime)",
+    "Grade B (Acceptable / Rework)",
+    "Grade C (Defective / Quarantine)"
+  ],
+  "attention_rollout_enabled": true
+}

@@ -113,6 +113,26 @@ class FeedstockApp {
         if (!container) return;
         container.innerHTML = '';
 
+        // Permanent "+ Upload Custom Sheet" card as the first item
+        const uploadCard = document.createElement('div');
+        uploadCard.className = 'sample-card upload-trigger-card';
+        uploadCard.title = 'Click to upload your own steel feedstock image for AI inspection';
+        uploadCard.innerHTML = `
+            <div class="sample-thumb-wrap upload-thumb">
+                <i data-lucide="upload-cloud" class="upload-icon-pulse"></i>
+            </div>
+            <div class="sample-info">
+                <span class="sample-badge" style="background: rgba(0, 210, 255, 0.25); color: #00d2ff;">+ CUSTOM</span>
+                <div class="sample-name" style="font-weight:700; color:#00d2ff;">Upload Image</div>
+                <div class="sample-meta">Browse local sheet</div>
+            </div>
+        `;
+        uploadCard.addEventListener('click', () => {
+            const globalInput = document.getElementById('globalFileInput');
+            if (globalInput) globalInput.click();
+        });
+        container.appendChild(uploadCard);
+
         const badgeStyles = {
             0: { bg: 'rgba(46, 204, 113, 0.2)', color: '#2ecc71', label: 'Prime (A)' },
             1: { bg: 'rgba(0, 210, 255, 0.2)', color: '#00d2ff', label: 'C1: Pitted' },
@@ -174,35 +194,52 @@ class FeedstockApp {
     }
 
     initUploadEvents() {
+        const globalInput = document.getElementById('globalFileInput');
         const selectBtn = document.getElementById('selectFileBtn');
         const fileInput = document.getElementById('fileInput');
         const dropzone = document.getElementById('dropzonePlaceholder');
+        const headerBtn = document.getElementById('uploadImageHeaderBtn');
+        const viewerBtn = document.getElementById('uploadImageViewerBtn');
+        const viewport = document.getElementById('viewportContainer');
 
-        if (selectBtn && fileInput) {
-            selectBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+        const triggerFileDialog = (e) => {
+            if (e) e.stopPropagation();
+            if (globalInput) {
+                globalInput.value = '';
+                globalInput.click();
+            } else if (fileInput) {
+                fileInput.value = '';
                 fileInput.click();
-            });
-            dropzone.addEventListener('click', () => fileInput.click());
+            }
+        };
 
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    const fd = new FormData();
-                    fd.append('file', e.target.files[0]);
-                    this.inspectUpload(fd);
-                }
-            });
+        if (headerBtn) headerBtn.addEventListener('click', triggerFileDialog);
+        if (viewerBtn) viewerBtn.addEventListener('click', triggerFileDialog);
+        if (selectBtn) selectBtn.addEventListener('click', triggerFileDialog);
+        if (dropzone) dropzone.addEventListener('click', triggerFileDialog);
 
-            // Drag and drop
-            dropzone.addEventListener('dragover', (e) => {
+        const handleFileSelection = (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                const fd = new FormData();
+                fd.append('file', e.target.files[0]);
+                this.inspectUpload(fd);
+            }
+        };
+
+        if (globalInput) globalInput.addEventListener('change', handleFileSelection);
+        if (fileInput) fileInput.addEventListener('change', handleFileSelection);
+
+        // Allow Drag and drop onto the entire viewport canvas at all times
+        if (viewport) {
+            viewport.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                dropzone.classList.add('dragover');
+                viewport.classList.add('dragover');
             });
-            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-            dropzone.addEventListener('drop', (e) => {
+            viewport.addEventListener('dragleave', () => viewport.classList.remove('dragover'));
+            viewport.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropzone.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) {
+                viewport.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     const fd = new FormData();
                     fd.append('file', e.dataTransfer.files[0]);
                     this.inspectUpload(fd);

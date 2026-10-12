@@ -33,6 +33,9 @@
             </div>
         </div>
         <div class="header-right">
+            <button id="uploadImageHeaderBtn" class="btn btn-primary btn-sm" title="Upload custom steel sheet image">
+                <i data-lucide="upload-cloud"></i> Upload Image
+            </button>
             <button id="soundToggleBtn" class="icon-btn" title="Toggle Audio Alerts">
                 <i data-lucide="volume-2" id="soundIcon"></i>
             </button>
@@ -116,6 +119,9 @@
                             </button>
                         </div>
                         <div class="viewer-controls">
+                            <button id="uploadImageViewerBtn" class="btn btn-secondary btn-sm" title="Upload new steel image for AI detection">
+                                <i data-lucide="upload"></i> Upload Sheet
+                            </button>
                             <div class="zoom-controls">
                                 <button id="zoomOutBtn" class="icon-btn-sm" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
                                 <span id="zoomLevel">100%</span>
@@ -467,6 +473,38 @@
                             <p><strong>Project Guide:</strong> Mr. S. Balaji, Assistant Professor (AI &amp; ML)</p>
                         </div>
 
+                        <div class="glass-panel" style="margin-bottom: 24px; background: rgba(13, 20, 36, 0.9); border-color: rgba(0, 210, 255, 0.3);">
+                            <div class="panel-header" style="margin-bottom: 10px;">
+                                <div class="panel-title-group">
+                                    <i data-lucide="cpu" class="panel-icon text-cyan"></i>
+                                    <h4 style="color: #fff; margin:0;">Active Vision Transformer (ViT) Model Weights</h4>
+                                </div>
+                                <span class="badge badge-success"><span class="dot"></span>LOADED IN MEMORY</span>
+                            </div>
+                            <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 12px;" id="vitModelMetricsGrid">
+                                <div class="metric-card">
+                                    <div class="metric-label">Model Architecture</div>
+                                    <div class="metric-value" style="font-size: 14px; color: #00d2ff;">ViT-Patch16-224</div>
+                                    <div class="metric-sub">6 Layers ? 6 Heads</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Neural Weights File</div>
+                                    <div class="metric-value" style="font-size: 13px; color: #2ecc71;">vit_feedstock_defect_model.pth</div>
+                                    <div class="metric-sub">42.54 MB Checkpoint</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Trainable Parameters</div>
+                                    <div class="metric-value" style="font-size: 16px; color: #ffcc00;">11,142,920</div>
+                                    <div class="metric-sub">384-Dim Token Embeddings</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Attention Rollout</div>
+                                    <div class="metric-value" style="font-size: 14px; color: #a855f7;">196 Spatial Patches</div>
+                                    <div class="metric-sub">14x14 Patch Grid</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="arch-section">
                             <h4>Vision Transformer (ViT) Deep Learning Architecture</h4>
                             <div class="pipeline-flow">
@@ -524,6 +562,9 @@
             </div>
         </section>
     </main>
+
+    <!-- Hidden Global File Input for 1-Click Upload -->
+    <input type="file" id="globalFileInput" accept="image/jpeg,image/png,image/bmp,image/webp" style="display: none;">
 
     <!-- Floating Audio Element -->
     <audio id="passAudio" preload="auto" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>

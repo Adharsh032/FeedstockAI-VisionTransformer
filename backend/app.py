@@ -33,6 +33,31 @@ app.add_middleware(
 
 # ----------------- API Endpoints ----------------- #
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def get_favicon():
+    fav = FRONTEND_DIR / "assets" / "favicon.ico"
+    if fav.exists():
+        return FileResponse(fav, media_type="image/x-icon")
+    return Response(status_code=204)
+
+@app.get("/api/model/info")
+async def model_info():
+    from pathlib import Path
+    import json
+    meta_path = Path("models/model_metadata.json")
+    if meta_path.exists():
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+    else:
+        meta = {
+            "model_name": "Feedstock Vision Transformer (ViT-Patch16-224)",
+            "total_parameters": 11142920,
+            "patch_size": "16x16 pixels"
+        }
+    service = get_inference_service()
+    meta["active_device"] = service.detector.device
+    return meta
+
 @app.get("/api/health")
 async def health_check():
     return {

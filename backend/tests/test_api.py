@@ -7,6 +7,16 @@ class TestFeedstockAPI(unittest.TestCase):
     def setUpClass(cls):
         cls.client = TestClient(app)
 
+    def test_favicon(self):
+        res = self.client.get('/favicon.ico')
+        self.assertEqual(res.status_code, 200)
+
+    def test_model_info(self):
+        res = self.client.get('/api/model/info')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('total_parameters', res.json())
+        self.assertEqual(res.json()['total_parameters'], 11142920)
+
     def test_health(self):
         res = self.client.get('/api/health')
         self.assertEqual(res.status_code, 200)
